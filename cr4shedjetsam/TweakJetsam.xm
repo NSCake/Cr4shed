@@ -19,7 +19,7 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 }
 
 %hook MemoryResourceException
--(BOOL)extractCorpseInfo
+- (BOOL)extractCorpseInfo
 {
 	BOOL ret = %orig;
 	MRYIPCCenter *ipcCenter = [MRYIPCCenter centerNamed:@"com.muirey03.cr4sheddserver"];
@@ -41,7 +41,7 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 }
 
 %new
--(void)generateCr4shedReport
+- (void)generateCr4shedReport
 {
 	time_t crashTime = [self.startTime timeIntervalSince1970];
 	NSString *dateString = stringFromTime(crashTime, CR4DateFormatPretty);
@@ -83,7 +83,7 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 }
 
 %new
--(NSString *)fetchMemoryInfo
+- (NSString *)fetchMemoryInfo
 {
 	NSMutableString *memoryInfo = [NSMutableString new];
 	mach_port_t task = self.task;
