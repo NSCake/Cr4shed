@@ -11,10 +11,10 @@
 #import "../cr4shedmach/mach_utils.h"
 #import "cr4shed_jetsam.h"
 
-static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
+static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 {
-	MRYIPCCenter* ipcCenter = [MRYIPCCenter centerNamed:@"com.muirey03.cr4sheddserver"];
-	NSDictionary* reply = [ipcCenter callExternalMethod:@selector(writeString:) withArguments:@{@"string" : str, @"filename" : filename}];
+	MRYIPCCenter *ipcCenter = [MRYIPCCenter centerNamed:@"com.muirey03.cr4sheddserver"];
+	NSDictionary *reply = [ipcCenter callExternalMethod:@selector(writeString:) withArguments:@{@"string" : str, @"filename" : filename}];
 	return reply[@"path"];
 }
 
@@ -22,7 +22,7 @@ static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
 -(BOOL)extractCorpseInfo
 {
 	BOOL ret = %orig;
-	MRYIPCCenter* ipcCenter = [MRYIPCCenter centerNamed:@"com.muirey03.cr4sheddserver"];
+	MRYIPCCenter *ipcCenter = [MRYIPCCenter centerNamed:@"com.muirey03.cr4sheddserver"];
 	
 	BOOL shouldLogJetsam = [[ipcCenter callExternalMethod:@selector(shouldLogJetsam) withArguments:@{}] boolValue];
 	if (!shouldLogJetsam)
@@ -30,7 +30,7 @@ static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
 		return ret;
 	}
 	
-	NSNumber* blacklistedBool = [ipcCenter callExternalMethod:@selector(isProcessBlacklisted:) withArguments:self.execName];
+	NSNumber *blacklistedBool = [ipcCenter callExternalMethod:@selector(isProcessBlacklisted:) withArguments:self.execName];
 	if (!blacklistedBool.boolValue)
 	{
 		[self extractBacktraceInfo];
@@ -44,10 +44,10 @@ static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
 -(void)generateCr4shedReport
 {
 	time_t crashTime = [self.startTime timeIntervalSince1970];
-	NSString* dateString = stringFromTime(crashTime, CR4DateFormatPretty);
-	NSString* device = [NSString stringWithFormat:@"%@, iOS %@", deviceName(), deviceVersion()];
-	NSString* const reason = @"The process was terminated for exceeding jetsam memory limits";
-	NSMutableString* logStr = [NSMutableString stringWithFormat:@"Date: %@\n"
+	NSString *dateString = stringFromTime(crashTime, CR4DateFormatPretty);
+	NSString *device = [NSString stringWithFormat:@"%@, iOS %@", deviceName(), deviceVersion()];
+	NSString *const reason = @"The process was terminated for exceeding jetsam memory limits";
+	NSMutableString *logStr = [NSMutableString stringWithFormat:@"Date: %@\n"
 																@"Process: %@\n"
 																@"Bundle id: %@\n"
 																@"Device: %@\n\n"
@@ -65,7 +65,7 @@ static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
 		[logStr appendString:@"\n"];
 	[logStr appendFormat:@"\n%@", [self prettyPrintBinaryImages]];
 
-	NSDictionary* extraInfo = @{
+	NSDictionary *extraInfo = @{
 		@"NSExceptionReason" : reason,
 		@"ProcessName" : self.execName ?: @"",
 		@"ProcessBundleID" : self.bundleID ?: @""
@@ -73,19 +73,19 @@ static NSString* serverWriteStringToFile(NSString* str, NSString* filename)
 	logStr = [addInfoToLog(logStr, extraInfo) mutableCopy];
 
 	// Get the date to use for the filename:
-	NSString* filenameDateStr = stringFromTime(crashTime, CR4DateFormatFilename);
+	NSString *filenameDateStr = stringFromTime(crashTime, CR4DateFormatFilename);
 
 	// Get the path for the new crash log:
-	NSString* path = [NSString stringWithFormat:@"%@@%@", self.execName, filenameDateStr];
+	NSString *path = [NSString stringWithFormat:@"%@@%@", self.execName, filenameDateStr];
 
 	// Create the crash log
 	serverWriteStringToFile(logStr, path);
 }
 
 %new
--(NSString*)fetchMemoryInfo
+-(NSString *)fetchMemoryInfo
 {
-	NSMutableString* memoryInfo = [NSMutableString new];
+	NSMutableString *memoryInfo = [NSMutableString new];
 	mach_port_t task = self.task;
 	struct task_basic_info taskInfo;
 	mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
