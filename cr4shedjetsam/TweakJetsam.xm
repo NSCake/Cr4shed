@@ -85,13 +85,14 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 %new
 - (NSString *)fetchMemoryInfo
 {
-	NSMutableString *memoryInfo = [NSMutableString new];
 	mach_port_t task = self.task;
 	struct task_basic_info taskInfo;
 	mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
 	kern_return_t kr = task_info(task, TASK_BASIC_INFO, (task_info_t)&taskInfo, &count);
 	if (kr == KERN_SUCCESS)
 	{
+		NSMutableString *memoryInfo = [NSMutableString new];
+		
 		[memoryInfo appendFormat:@"Virtual memory size: 0x%zx bytes\n", (size_t)taskInfo.virtual_size];
 		[memoryInfo appendFormat:@"Resident memory size: 0x%zx bytes\n", (size_t)taskInfo.resident_size];
 		
@@ -119,7 +120,10 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 			[memoryInfo appendFormat:@"CPU usage: %u%%\n", cpuUsage];
 			[memoryInfo appendFormat:@"Thread count: %u\n", threadCount];
 		}
+		
+		return memoryInfo;
 	}
-	return memoryInfo;
+	
+	return @"\n";
 }
 %end
