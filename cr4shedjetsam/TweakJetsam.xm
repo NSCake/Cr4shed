@@ -47,39 +47,41 @@ static NSString *serverWriteStringToFile(NSString *str, NSString *filename)
 	NSString *dateString = stringFromTime(crashTime, CR4DateFormatPretty);
 	NSString *device = [NSString stringWithFormat:@"%@, iOS %@", deviceName(), deviceVersion()];
 	NSString *const reason = @"The process was terminated for exceeding jetsam memory limits";
-	NSMutableString *logStr = [NSMutableString stringWithFormat:@"Date: %@\n"
-																@"Process: %@\n"
-																@"Bundle id: %@\n"
-																@"Device: %@\n\n"
-																@"Reason: %@\n"
-																@"Uptime: %llds\n",
-																dateString,
-																self.execName,
-																self.bundleID,
-																device,
-																reason,
-																(long long)self.upTime];
-
-	[logStr appendFormat:@"%@", [self fetchMemoryInfo]];
-	if ([logStr characterAtIndex:logStr.length - 1] != '\n')
-		[logStr appendString:@"\n"];
-	[logStr appendFormat:@"\n%@", [self prettyPrintBinaryImages]];
+	NSMutableString *logStr = [NSMutableString stringWithFormat:@" \
+		Date: %@ \
+		Process: %@ \
+		Bundle id: %@ \
+		Device: %@\n \
+		Reason: %@ \
+		Uptime: %llds \n \
+		%@ \n%@ \n", // fetchMemoryInfo, prettyPrintBinaryImages
+		
+		dateString,
+		self.execName,
+		self.bundleID,
+		device,
+		reason,
+		(long long)self.upTime,
+		[self fetchMemoryInfo],
+		[self prettyPrintBinaryImages]
+	];
 
 	NSDictionary *extraInfo = @{
 		@"NSExceptionReason" : reason,
 		@"ProcessName" : self.execName ?: @"",
-		@"ProcessBundleID" : self.bundleID ?: @""
+		@"ProcessBundleID" : self.bundleID ?: @"",
 	};
-	logStr = [addInfoToLog(logStr, extraInfo) mutableCopy];
+	
+	NSString *fileContents = addInfoToLog(logStr, extraInfo);
 
-	// Get the date to use for the filename:
+	// Get the date to use for the filename
 	NSString *filenameDateStr = stringFromTime(crashTime, CR4DateFormatFilename);
 
-	// Get the path for the new crash log:
+	// Get the path for the new crash log
 	NSString *path = [NSString stringWithFormat:@"%@@%@", self.execName, filenameDateStr];
 
 	// Create the crash log
-	serverWriteStringToFile(logStr, path);
+	serverWriteStringToFile(fileContents, path);
 }
 
 %new
